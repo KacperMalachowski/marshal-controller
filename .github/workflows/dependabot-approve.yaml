@@ -11,7 +11,7 @@ jobs:
       - name: Dependabot metadata
         id: dependabot-metadata
         uses: dependabot/fetch-metadata@v1
-      - uses: action@checkout@v4
+      - uses: actions/checkout@v4
       - name: Enable auto-merge for Dependabot PRs
         run: gh pr merge --auto --merge "$PR_URL"
         env:
