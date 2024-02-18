@@ -19,7 +19,7 @@ jobs:
         build:
           - name: 'MarshalController'
             platform: 'windows/amd64'
-            os: 'windows'
+            os: 'windows-latest'
     runs-on: ${{ matrix.build.os }}
     steps:
       - name: Checkout
