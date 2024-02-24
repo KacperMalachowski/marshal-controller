@@ -17,10 +17,12 @@ jobs:
     strategy:
       matrix:
         build:
-          - name: 'MarshalController'
+          - name: 'windows-x64.exe'
+            artifact: 'windows-x64'
             platform: 'windows/amd64'
             os: 'windows-latest'
-          - name: 'MarshalController'
+          - name: 'windows-arm64.exe'
+            artifact: 'windows-arm64'
             platform: 'windows/arm64'
             os: 'windows-latest'
     runs-on: ${{ matrix.build.os }}
@@ -29,15 +31,45 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Build wails
-        uses: dAppServer/wails-build-action@v2.2
-        id: build
+      - name: Setup Golang
+        uses: actions/setup-go@v4
         with:
-          nsis: false
-          build-name: ${{ matrix.build.name }}
-          build-platform: ${{ matrix.build.platform }}
+          check-latest: true
           go-version: '1.21'
+      - name: Setup Nodejs
+        uses: actions/setup-node@v4
+        with:
           node-version: '21.5'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.8.0
+      - name: Install Linux Wails deps
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
+      - name: Install macOS Wails deps
+        if: runner.os == 'macOS'
+        run: brew install mitchellh/gon/gon
+      
+      - name: Build App
+        run: wails build --platform ${{ matrix.build.platform }}  -webview2 download -o ${{ matrix.build.name }}
+
+      - name: Add macOS permissions
+        if: runner.os == 'macOS'
+        run: chmod +x build/bin/*/Contents/MacOS/*
+        shell: bash
+      - name: Add Linux permissions
+        if: runner.os == 'Linux'
+        run: chmod +x build/bin/*
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: marshaller-${{ matrix.build.artifact }}
+          path: |
+            */bin/*
+            *\bin\*
+          retention-days: 1
 
   create_release:
     if: github.event_name == 'push'
@@ -60,7 +92,7 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "./artifacts/**/*"
+          artifacts: "artifacts/**/*"
           generateReleaseNotes: true
           tag: ${{ steps.create_release.outputs.tag }}
 
