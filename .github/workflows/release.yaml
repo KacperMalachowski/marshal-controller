@@ -78,6 +78,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+      - run: tree artifacts
       - name: Create release tag
         id: create_release
         run: |
@@ -87,7 +88,7 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "artifacts/**/*"
+          artifacts: ./artifacts/**/*
           generateReleaseNotes: true
           tag: ${{ steps.create_release.outputs.tag }}
 
