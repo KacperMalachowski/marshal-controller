@@ -84,7 +84,7 @@ jobs:
           TAG="v$(date +'%d%m%Y')-$(echo ${{ github.sha }} | cut -c1-8)"
           echo "Creating release tag $TAG"
           echo "::set-output name=tag::$TAG"
-      - run: mv ./artifacts/**/marshaller-*
+      - run: mv ./artifacts/**/marshaller-* ./
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
