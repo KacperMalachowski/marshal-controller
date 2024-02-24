@@ -78,17 +78,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - run: tree artifacts
       - name: Create release tag
         id: create_release
         run: |
           TAG="v$(date +'%d%m%Y')-$(echo ${{ github.sha }} | cut -c1-8)"
           echo "Creating release tag $TAG"
           echo "::set-output name=tag::$TAG"
+      - run: mv ./artifacts/**/marshaller-*
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ./artifacts/**/marshaller-*
+          artifacts: ./marshaller-*
           generateReleaseNotes: true
           tag: ${{ steps.create_release.outputs.tag }}
 
