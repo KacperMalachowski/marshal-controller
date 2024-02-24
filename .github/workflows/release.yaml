@@ -16,16 +16,9 @@ jobs:
     name: Build
     strategy:
       matrix:
-        build:
-          - name: 'windows-x64.exe'
-            artifact: 'windows-x64'
-            platform: 'windows/amd64'
-            os: 'windows-latest'
-          - name: 'windows-arm64.exe'
-            artifact: 'windows-arm64'
-            platform: 'windows/arm64'
-            os: 'windows-latest'
-    runs-on: ${{ matrix.build.os }}
+        os: [windows]
+        arch: [amd64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,7 +44,7 @@ jobs:
         run: brew install mitchellh/gon/gon
       
       - name: Build App
-        run: wails build --platform ${{ matrix.build.platform }}  -webview2 download -o ${{ matrix.build.name }}
+        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 download -o marshaller-${{ matrix.os }}-${{ matrix.arch }}
 
       - name: Add macOS permissions
         if: runner.os == 'macOS'
@@ -62,13 +55,15 @@ jobs:
         run: chmod +x build/bin/*
         shell: bash
 
+      - run: for x in marshaller-windows-*; do mv $x $x.exe; done
+        working-directory: ./build/bin/
+        if: matrix.os == 'windows'
+
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: marshaller-${{ matrix.build.artifact }}
-          path: |
-            */bin/*
-            *\bin\*
+          name: marshaller-${{ matrix.os }}-${{ matrix.arch }}
+          path: ./build/bin/marshaller-*
           retention-days: 1
 
   create_release:
