@@ -75,6 +75,10 @@ func (a *App) Connect(address string) string {
 		for {
 			message := <-a.client.ReadChan
 
+			if message == "" {
+				continue
+			}
+
 			runtime.LogInfo(a.ctx, fmt.Sprint(message))
 			runtime.EventsEmit(a.ctx, "message", message)
 		}
