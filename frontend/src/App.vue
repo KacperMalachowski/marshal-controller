@@ -30,13 +30,13 @@ function handleConnect() {
         <button
           @click="handleConnect"
           :disabled="stationStore.hills.length === 0"
-          class="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
+          class="btn btn-main"
         >
           {{ connected ? 'Disconnect' : 'Connect' }}
         </button>
         <button
           @click="() => stationStore.loadStation()"
-          class="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
+          class="btn btn-secondary"
         >
           Load station definition
         </button>
@@ -45,3 +45,21 @@ function handleConnect() {
   </nav>
   <RouterView />
 </template>
+
+<style lang="scss">
+  .btn {
+    @apply font-bold py-2 px-4 rounded mr-2 ml-2;
+  }
+  .btn-main {
+    @apply bg-gray-300;
+  }
+  .btn-main:hover {
+    @apply bg-gray-700 text-white;
+  }
+  .btn-secondary {
+    @apply bg-transparent border border-gray-700 hover:border-transparent;
+  }
+  .btn-secondary:hover {
+    @apply bg-gray-300;
+  }
+</style>

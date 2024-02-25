@@ -6,6 +6,8 @@ export function Connect(arg1:string):Promise<string>;
 
 export function Disconnect():Promise<void>;
 
+export function GetStationHash():Promise<string>;
+
 export function LoadStationFile():Promise<station.Definition>;
 
 export function SetSignal(arg1:station.Hill,arg2:string):Promise<void>;

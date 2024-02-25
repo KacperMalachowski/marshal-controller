@@ -10,6 +10,10 @@ export function Disconnect() {
   return window['go']['main']['App']['Disconnect']();
 }
 
+export function GetStationHash() {
+  return window['go']['main']['App']['GetStationHash']();
+}
+
 export function LoadStationFile() {
   return window['go']['main']['App']['LoadStationFile']();
 }

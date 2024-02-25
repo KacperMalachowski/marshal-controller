@@ -59,7 +59,7 @@ func (a *App) LoadStationFile() station.Definition {
 
 	a.station = station
 	a.stationHash = calculateSHA256(data)
-	a.client = td2.New(a.ctx, string(a.stationHash))
+	a.client = td2.New(a.ctx, fmt.Sprintf("%x", a.stationHash))
 
 	return station
 }
@@ -111,6 +111,10 @@ func (a *App) SetSignal(hill station.Hill, signal string) {
 			return
 		}
 	}
+}
+
+func (a *App) GetStationHash() string {
+	return fmt.Sprintf("%x", a.stationHash)
 }
 
 func calculateSHA256(data []byte) []byte {
