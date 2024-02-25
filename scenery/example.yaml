@@ -1,0 +1,5 @@
+hills:
+  - signal: Tr1
+    repeaters:
+      - Tr2
+  - signal: Tr3
