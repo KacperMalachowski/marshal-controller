@@ -2,21 +2,27 @@ package td2
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net"
 	"strings"
+	"time"
 )
 
 type Client struct {
+	ctx         context.Context
 	conn        net.Conn
 	stationHash []byte
 	ReadChan    chan string
+	IsConnected bool
 }
 
-func New(stationHash string) *Client {
+func New(ctx context.Context, stationHash string) *Client {
 	return &Client{
+		ctx:         ctx,
 		stationHash: []byte(stationHash),
 		ReadChan:    make(chan string),
+		IsConnected: false,
 	}
 }
 
@@ -26,18 +32,22 @@ func (c *Client) Connect(address string) error {
 		return err
 	}
 
+	c.conn = conn
+	c.IsConnected = true
+
 	go c.readMessages()
 
-	c.conn = conn
 	return nil
 }
 
 func (c *Client) Disconnect() {
+	c.IsConnected = false
 	c.conn.Close()
 }
 
-func (c *Client) Write(data []byte) error {
-	_, err := c.conn.Write(data)
+func (c *Client) Write(data string) error {
+	c.conn.SetWriteDeadline(time.Now().Add(1 * time.Second))
+	_, err := c.conn.Write([]byte(data + "\r\n"))
 	return err
 }
 
@@ -65,6 +75,6 @@ func (c *Client) readMessages() {
 func (c *Client) handleCommands(message string) {
 	switch {
 	case strings.HasPrefix(message, "/SHA2"):
-		c.Write([]byte(fmt.Sprintf("/SHA2 %s", c.stationHash)))
+		c.Write(fmt.Sprintf("/SHA2 %s", c.stationHash))
 	}
 }

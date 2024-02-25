@@ -1,181 +1,47 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
+import { ref } from "vue";
+import { Connect, Disconnect } from "../wailsjs/go/main/App";
+import { useStationStore } from "./stores/station";
 
-const { t, availableLocales: languages, locale } = useI18n();
+const connected = ref(false);
+const stationStore = useStationStore()
 
-const onclickLanguageHandle = (item: string) => {
-  item !== locale.value ? (locale.value = item) : false;
-};
-
-const onclickMinimise = () => {};
-
-const onclickQuit = () => {};
-
-document.body.addEventListener("click", function (event) {
-  event.preventDefault();
-});
+function handleConnect() {
+  if (connected.value) {
+    connected.value = false
+    Disconnect()
+  } else {
+    Connect("127.0.0.1:7424")
+    connected.value = true
+  }
+}
 </script>
 
 <template>
-  <!-- Header -->
-  <div class="header">
-    <!-- navigation -->
-    <div class="nav">
-      <router-link to="/">{{ t("nav.home") }}</router-link>
-      <router-link to="/about">{{ t("nav.about") }}</router-link>
+  <nav class="flex items-center justify-between flex-wrap bg-teal-500 p-6">
+    <div class="flex items-center flex-shrink-0 text-white mr-6">
+      <span class="font-semibold text-xl tracking-tight"
+        >Marshaller Controller</span
+      >
     </div>
-    <!-- Menu -->
-    <div class="menu">
-      <div class="language">
-        <div
-          v-for="item in languages"
-          :key="item"
-          :class="{ active: item === locale }"
-          @click="onclickLanguageHandle(item)"
-          class="lang-item"
+    <div class="flex-grow flex items-center w-auto">
+      <div class="text-sm flex-grow"></div>
+      <div>
+        <button
+          @click="handleConnect"
+          :disabled="stationStore.hills.length === 0"
+          class="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
         >
-          {{ t("languages." + item) }}
-        </div>
-      </div>
-      <div class="bar">
-        <div class="bar-btn" @click="onclickMinimise">
-          {{ t("topbar.minimise") }}
-        </div>
-        <div class="bar-btn" @click="onclickQuit">{{ t("topbar.quit") }}</div>
+          {{ connected ? 'Disconnect' : 'Connect' }}
+        </button>
+        <button
+          @click="() => stationStore.loadStation()"
+          class="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
+        >
+          Load station definition
+        </button>
       </div>
     </div>
-  </div>
-  <!-- Page -->
-  <div class="view">
-    <router-view />
-  </div>
+  </nav>
+  <RouterView />
 </template>
-
-<style lang="scss">
-@import url("./assets/css/reset.css");
-@import url("./assets/css/font.css");
-
-html {
-  width: 100%;
-  height: 100%;
-}
-body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: "JetBrainsMono";
-  background-color: transparent;
-}
-
-#app {
-  position: relative;
-  // width: 900px;
-  // height: 520px;
-  height: 100%;
-  background-color: rgba(219, 188, 239, 0.9);
-  overflow: hidden;
-}
-.header {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: space-between;
-  height: 50px;
-  padding: 0 10px;
-  background-color: rgba(171, 126, 220, 0.9);
-  .nav {
-    a {
-      display: inline-block;
-      min-width: 50px;
-      height: 30px;
-      line-height: 30px;
-      padding: 0 5px;
-      margin-right: 8px;
-      background-color: #ab7edc;
-      border-radius: 2px;
-      text-align: center;
-      text-decoration: none;
-      color: #000000;
-      font-size: 14px;
-      white-space: nowrap;
-      &:hover,
-      &.router-link-exact-active {
-        background-color: #d7a8d8;
-        color: #ffffff;
-      }
-    }
-  }
-  .menu {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-between;
-    .language {
-      margin-right: 20px;
-      border-radius: 2px;
-      background-color: #c3c3c3;
-      overflow: hidden;
-      .lang-item {
-        display: inline-block;
-        min-width: 50px;
-        height: 30px;
-        line-height: 30px;
-        padding: 0 5px;
-        background-color: transparent;
-        text-align: center;
-        text-decoration: none;
-        color: #000000;
-        font-size: 14px;
-        &:hover {
-          background-color: #ff050542;
-          cursor: pointer;
-        }
-        &.active {
-          background-color: #ff050542;
-          color: #ffffff;
-          cursor: not-allowed;
-        }
-      }
-    }
-    .bar {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-items: center;
-      justify-content: flex-end;
-      min-width: 150px;
-      .bar-btn {
-        display: inline-block;
-        min-width: 80px;
-        height: 30px;
-        line-height: 30px;
-        padding: 0 5px;
-        margin-left: 8px;
-        background-color: #ab7edc;
-        border-radius: 2px;
-        text-align: center;
-        text-decoration: none;
-        color: #000000;
-        font-size: 14px;
-        &:hover {
-          background-color: #d7a8d8;
-          color: #ffffff;
-          cursor: pointer;
-        }
-      }
-    }
-  }
-}
-
-.view {
-  position: absolute;
-  top: 50px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
-}
-</style>

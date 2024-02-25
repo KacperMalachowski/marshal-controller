@@ -2,7 +2,7 @@ export namespace station {
 	
 	export class Hill {
 	    signal: string;
-	    repeaters: string;
+	    repeaters: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Hill(source);

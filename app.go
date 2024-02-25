@@ -2,20 +2,21 @@ package main
 
 import (
 	"changeme/pkg/station"
+	"changeme/pkg/td2"
 	"context"
 	"crypto/sha256"
-	"encoding/json"
-	"net"
+	"fmt"
 	"os"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"gopkg.in/yaml.v3"
 )
 
 type App struct {
 	ctx         context.Context
 	stationHash []byte
 	station     station.Definition
-	conn        net.Conn
+	client      *td2.Client
 }
 
 func NewApp() *App {
@@ -36,27 +37,80 @@ func (a *App) beforeClose(ctx context.Context) (prevent bool) {
 func (a *App) shutdown(ctx context.Context) {
 }
 
-func (a *App) LoadStationFile() (station.Definition, string, error) {
+func (a *App) LoadStationFile() station.Definition {
 	file, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
 	if err != nil {
-		return a.station, string(a.stationHash), err
+		runtime.LogError(a.ctx, fmt.Sprint(err))
+		return a.station
 	}
 
 	data, err := os.ReadFile(file)
 	if err != nil {
-		return a.station, string(a.stationHash), err
+		runtime.LogError(a.ctx, fmt.Sprint(err))
+		return a.station
 	}
 
 	var station station.Definition
-	err = json.Unmarshal(data, &station)
+	err = yaml.Unmarshal(data, &station)
 	if err != nil {
-		return a.station, string(a.stationHash), err
+		runtime.LogError(a.ctx, fmt.Sprint(err))
+		return a.station
 	}
 
 	a.station = station
 	a.stationHash = calculateSHA256(data)
+	a.client = td2.New(a.ctx, string(a.stationHash))
 
-	return station, string(a.stationHash), nil
+	return station
+}
+
+func (a *App) Connect(address string) string {
+	err := a.client.Connect(address)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprint(err, address))
+		return fmt.Sprintf("%s", err)
+	}
+
+	go func() {
+		for {
+			message := <-a.client.ReadChan
+
+			runtime.LogInfo(a.ctx, fmt.Sprint(message))
+			runtime.EventsEmit(a.ctx, "message", message)
+		}
+	}()
+
+	return ""
+}
+
+func (a *App) Disconnect() {
+	a.client.Disconnect()
+}
+
+func (a *App) SetSignal(hill station.Hill, signal string) {
+	if !a.client.IsConnected {
+		runtime.MessageDialog(a.ctx, runtime.MessageDialogOptions{
+			Type:    runtime.ErrorDialog,
+			Title:   "Disconnected",
+			Message: "You cannot set signal while you're disconnected!",
+		})
+		return
+	}
+
+	runtime.LogInfo(a.ctx, fmt.Sprint("Setting: ", signal))
+	err := a.client.Write(fmt.Sprintf("%s:%s", hill.Signal, signal))
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprint(err))
+		return
+	}
+
+	for _, repeater := range hill.Repeaters {
+		err := a.client.Write(fmt.Sprintf("%s:%s", repeater, signal))
+		if err != nil {
+			runtime.LogError(a.ctx, fmt.Sprint(err))
+			return
+		}
+	}
 }
 
 func calculateSHA256(data []byte) []byte {
