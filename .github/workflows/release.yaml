@@ -44,7 +44,7 @@ jobs:
         run: brew install mitchellh/gon/gon
       
       - name: Build App
-        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 download -o marshaller-${{ matrix.os }}-${{ matrix.arch }}
+        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 embed -o marshaller-${{ matrix.os }}-${{ matrix.arch }}
 
       - name: Add macOS permissions
         if: runner.os == 'macOS'

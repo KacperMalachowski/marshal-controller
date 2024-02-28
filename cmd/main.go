@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
-	"changeme/pkg/td2"
 	"context"
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/kacpermalachowski/marshal-controller/pkg/td2"
 )
 
 func main() {

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"changeme/pkg/station"
-	"changeme/pkg/td2"
+	"github.com/kacpermalachowski/marshal-controller/pkg/station"
+	"github.com/kacpermalachowski/marshal-controller/pkg/td2"
 	"context"
 	"crypto/sha256"
 	"fmt"

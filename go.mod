@@ -1,4 +1,4 @@
-module changeme
+module github.com/kacpermalachowski/marshal-controller
 
 go 1.21
 
