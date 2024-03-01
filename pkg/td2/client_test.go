@@ -51,6 +51,17 @@ func TestConnectDisconnect(t *testing.T) {
 	}
 }
 
+func TestConnectionFailed(t *testing.T) {
+	ctx := context.Background()
+	stationHash := "exampleHash"
+	client := td2.New(ctx, stationHash)
+
+	err := client.Connect("127.0.0.1:0")
+	if err == nil {
+		t.Error("Expected error on Connect, but got nothing")
+	}
+}
+
 func TestWrite(t *testing.T) {
 	ctx := context.Background()
 	stationHash := "exampleHash"
