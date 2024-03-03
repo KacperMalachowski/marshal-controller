@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/kacpermalachowski/marshal-controller/pkg/station"
-	"github.com/kacpermalachowski/marshal-controller/pkg/td2"
 	"context"
 	"crypto/sha256"
 	"fmt"
 	"os"
 
+	"github.com/kacpermalachowski/marshal-controller/pkg/station"
+	"github.com/kacpermalachowski/marshal-controller/pkg/td2"
+
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"gopkg.in/yaml.v3"
 )
 
 type App struct {
@@ -50,8 +50,7 @@ func (a *App) LoadStationFile() station.Definition {
 		return a.station
 	}
 
-	var station station.Definition
-	err = yaml.Unmarshal(data, &station)
+	station, err := station.ParseStationDefinition(data)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprint(err))
 		return a.station
