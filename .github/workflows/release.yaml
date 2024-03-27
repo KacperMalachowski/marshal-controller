@@ -12,8 +12,25 @@ env:
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
+  test-go:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Setup Golang
+        uses: actions/setup-go@v4
+        with:
+          check-latest: true
+          go-version: '1.21'
+      - run: mkdir -p frontend/dist && touch frontend/dist/test.txt
+      - run: go test ./...
+
   build:
     name: Build
+    needs: test-go
     strategy:
       matrix:
         os: [windows]
@@ -44,7 +61,7 @@ jobs:
         run: brew install mitchellh/gon/gon
       
       - name: Build App
-        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 download -o marshaller-${{ matrix.os }}-${{ matrix.arch }}
+        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 embed -o marshaller-${{ matrix.os }}-${{ matrix.arch }}
 
       - name: Add macOS permissions
         if: runner.os == 'macOS'
