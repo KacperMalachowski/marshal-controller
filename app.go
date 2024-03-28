@@ -25,6 +25,7 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	runtime.LogInfo(ctx, fmt.Sprintf("Version: %s", "test"))
 }
 
 func (a *App) domReady(ctx context.Context) {
@@ -59,6 +60,7 @@ func (a *App) LoadStationFile() station.Definition {
 	a.station = station
 	a.stationHash = calculateSHA256(data)
 	a.client = td2.New(a.ctx, fmt.Sprintf("%x", a.stationHash))
+	runtime.LogInfof(a.ctx, "Loaded station file with hash: %s", a.stationHash)
 
 	return station
 }
