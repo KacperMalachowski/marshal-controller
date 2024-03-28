@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/kacpermalachowski/marshal-controller/internal/build"
 	"github.com/kacpermalachowski/marshal-controller/pkg/station"
 	"github.com/kacpermalachowski/marshal-controller/pkg/td2"
 
@@ -24,6 +25,7 @@ func NewApp() *App {
 }
 
 func (a *App) startup(ctx context.Context) {
+	fmt.Printf("Version %s, Time %s", build.Version, build.Time)
 	a.ctx = ctx
 }
 
@@ -119,6 +121,10 @@ func (a *App) SetSignal(hill station.Hill, signal string) {
 func (a *App) GetStationHash() string {
 	return fmt.Sprintf("%x", a.stationHash)
 }
+
+// func (a *App) CheckForUpdate(currentVersion string) (bool, string, string) {
+
+// }
 
 func calculateSHA256(data []byte) []byte {
 	h := sha256.New()
