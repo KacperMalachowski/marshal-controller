@@ -4,10 +4,25 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+        - "minor"
+        - "patch"
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+        - "minor"
+        - "patch"
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
       interval: "daily"
+      production-dependencies:
+        update-types:
+        - "minor"
+        - "patch"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
