@@ -65,11 +65,11 @@ func (a *App) LoadStationFile() station.Definition {
 	return station
 }
 
-func (a *App) Connect(address string) string {
+func (a *App) Connect(address string) error {
 	err := a.client.Connect(address)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprint(err, address))
-		return fmt.Sprintf("%s", err)
+		return err
 	}
 
 	go func() {
@@ -85,7 +85,7 @@ func (a *App) Connect(address string) string {
 		}
 	}()
 
-	return ""
+	return nil
 }
 
 func (a *App) Disconnect() {

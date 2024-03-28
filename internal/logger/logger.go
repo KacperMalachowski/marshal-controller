@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -26,15 +27,18 @@ func New(options ...Options) (*Logger, error) {
 		option(logger)
 	}
 
+	ts := time.Now().Format(time.RFC3339)
+	filename := fmt.Sprintf("log-%s.log", strings.Replace(strings.Replace(ts, ":", "", -1), "-", "", -1))
+
 	var path string
 	if filepath.IsAbs(logger.LogDir) {
-		path = filepath.Join(logger.LogDir, fmt.Sprintf("log-%s", time.Now().Format("01-02-2016_HHmmss")))
+		path = filepath.Join(logger.LogDir, filename)
 	} else {
 		ex, err := os.Executable()
 		if err != nil {
 			return nil, errors.WithMessage(err, "cannot find executable path")
 		}
-		path = filepath.Join(filepath.Dir(ex), logger.LogDir, fmt.Sprintf("log-%s.log", time.Now().Format("01-02-2016_HHmmss")))
+		path = filepath.Join(filepath.Dir(ex), logger.LogDir, filename)
 	}
 
 	err := os.MkdirAll(filepath.Dir(path), os.ModePerm)
