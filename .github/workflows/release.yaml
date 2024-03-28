@@ -31,12 +31,21 @@ jobs:
   build:
     name: Build
     needs: test-go
+    outputs:
+      version: ${{ steps.create_release.outputs.tag }}
     strategy:
       matrix:
         os: [windows]
         arch: [amd64]
     runs-on: ubuntu-latest
     steps:
+      - name: Create release tag
+        id: create_release
+        run: |
+          TAG="v$(date +'%d%m%Y')-$(echo ${{ github.sha }} | cut -c1-8)"
+          echo "Creating release tag $TAG"
+          echo "::set-output name=tag::$TAG"
+      - run: mv ./artifacts/**/marshaller-* ./
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -61,7 +70,7 @@ jobs:
         run: brew install mitchellh/gon/gon
       
       - name: Build App
-        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 embed -o marshaller-${{ matrix.os }}-${{ matrix.arch }}
+        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 embed -o marshaller-${{ matrix.os }}-${{ matrix.arch }} -ldflags "-X github.com/kacpermalachowski/marshal-controller/internal/build.Version=${{ steps.create_release.outputs.tag }} -X github.com/kacpermalachowski/marshal-controller/internal/build.Time=$(date)"
 
       - name: Add macOS permissions
         if: runner.os == 'macOS'
@@ -95,17 +104,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: Create release tag
-        id: create_release
-        run: |
-          TAG="v$(date +'%d%m%Y')-$(echo ${{ github.sha }} | cut -c1-8)"
-          echo "Creating release tag $TAG"
-          echo "::set-output name=tag::$TAG"
-      - run: mv ./artifacts/**/marshaller-* ./
+      
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./marshaller-*
           generateReleaseNotes: true
-          tag: ${{ steps.create_release.outputs.tag }}
+          tag: ${{ needs.build.outputs.version }}
 
