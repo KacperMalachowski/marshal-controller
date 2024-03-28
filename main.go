@@ -4,6 +4,7 @@ import (
 	"embed"
 	"log"
 
+	customlogger "github.com/kacpermalachowski/marshal-controller/internal/logger"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -22,28 +23,34 @@ var icon []byte
 func main() {
 	app := NewApp()
 
-	err := wails.Run(&options.App{
-		Title:             "marshal-controller",
-		Width:             900,
-		Height:            600,
-		MinWidth:          900,
-		MinHeight:         600,
-		MaxWidth:          1200,
-		MaxHeight:         800,
-		DisableResize:     false,
-		Fullscreen:        false,
-		Frameless:         false,
-		StartHidden:       false,
-		HideWindowOnClose: false,
-		BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 0},
-		Menu:              nil,
-		Logger:            nil,
-		LogLevel:          logger.DEBUG,
-		OnStartup:         app.startup,
-		OnDomReady:        app.domReady,
-		OnBeforeClose:     app.beforeClose,
-		OnShutdown:        app.shutdown,
-		WindowStartState:  options.Normal,
+	appLogger, err := customlogger.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = wails.Run(&options.App{
+		Title:              "marshal-controller",
+		Width:              900,
+		Height:             600,
+		MinWidth:           900,
+		MinHeight:          600,
+		MaxWidth:           1200,
+		MaxHeight:          800,
+		DisableResize:      false,
+		Fullscreen:         false,
+		Frameless:          false,
+		StartHidden:        false,
+		HideWindowOnClose:  false,
+		BackgroundColour:   &options.RGBA{R: 255, G: 255, B: 255, A: 0},
+		Menu:               nil,
+		Logger:             appLogger,
+		LogLevel:           logger.DEBUG,
+		LogLevelProduction: logger.INFO,
+		OnStartup:          app.startup,
+		OnDomReady:         app.domReady,
+		OnBeforeClose:      app.beforeClose,
+		OnShutdown:         app.shutdown,
+		WindowStartState:   options.Normal,
 		AssetServer: &assetserver.Options{
 			Assets:     assets,
 			Handler:    nil,
