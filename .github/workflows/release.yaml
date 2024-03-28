@@ -69,7 +69,7 @@ jobs:
         run: brew install mitchellh/gon/gon
       
       - name: Build App
-        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 embed -o marshaller-${{ matrix.os }}-${{ matrix.arch }} -ldflags "-X github.com/kacpermalachowski/marshal-controller/internal/build.Version='${{ steps.create_release.outputs.tag }}' -X github.com/kacpermalachowski/marshal-controller/internal/build.Time='$(date)'"
+        run: wails build --platform ${{ matrix.os}}/${{ matrix.arch }}  -webview2 embed -o marshaller-${{ matrix.os }}-${{ matrix.arch }} -ldflags "-X github.com/kacpermalachowski/marshal-controller/internal/build.Version='${{ steps.create_release.outputs.tag }}'"
 
       - name: Add macOS permissions
         if: runner.os == 'macOS'
