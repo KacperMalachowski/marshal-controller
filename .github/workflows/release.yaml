@@ -42,9 +42,9 @@ jobs:
       - name: Create release tag
         id: create_release
         run: |
-          TAG="v$(date +'%d%m%Y')-$(echo ${{ github.sha }} | cut -c1-8)"
+          TAG="$(date +'%Y.%m.%d%H%M%S')"
           echo "Creating release tag $TAG"
-          echo "::set-output name=tag::$TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -89,7 +89,7 @@ jobs:
         with:
           name: marshaller-${{ matrix.os }}-${{ matrix.arch }}
           path: ./build/bin/marshaller-*
-          retention-days: 1
+          retention-days: 7
 
   create_release:
     if: github.event_name == 'push'
@@ -111,5 +111,6 @@ jobs:
         with:
           artifacts: ./marshaller-*
           generateReleaseNotes: true
-          tag: ${{ needs.build.outputs.version }}
+          tag: v${{ needs.build.outputs.version }}
+          name: ${{ needs.build.outputs.version }}
 
