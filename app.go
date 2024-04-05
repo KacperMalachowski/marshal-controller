@@ -5,10 +5,13 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"os"
+	goruntime "runtime"
 
+	"github.com/kacpermalachowski/marshal-controller/internal/build"
 	"github.com/kacpermalachowski/marshal-controller/pkg/station"
 	"github.com/kacpermalachowski/marshal-controller/pkg/td2"
 
+	selfupdate "github.com/creativeprojects/go-selfupdate"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -25,7 +28,7 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	runtime.LogInfo(ctx, fmt.Sprintf("Version: %s", "test"))
+	runtime.LogInfo(ctx, fmt.Sprintf("Version %s, Time %s", build.Version, build.Time))
 }
 
 func (a *App) domReady(ctx context.Context) {
@@ -120,6 +123,24 @@ func (a *App) SetSignal(hill station.Hill, signal string) {
 
 func (a *App) GetStationHash() string {
 	return fmt.Sprintf("%x", a.stationHash)
+}
+
+func (a *App) CheckForUpdate(currentVersion string) (bool, error) {
+	latest, found, err := selfupdate.DetectLatest(a.ctx, selfupdate.ParseSlug("KacperMalachowski/marshal-controller"))
+	if err != nil {
+		return false, fmt.Errorf("error occurred while detecting version: %w", err)
+	}
+	if !found {
+		return false, fmt.Errorf("latest version for %s/%s could not be found from github repository", goruntime.GOOS, goruntime.GOARCH)
+	}
+
+	runtime.LogDebugf(a.ctx, "Current version %s is less or equal of found %s: %v", latest.Name, currentVersion, latest.LessOrEqual(currentVersion))
+	if latest.LessOrEqual(currentVersion) {
+		runtime.LogInfof(a.ctx, "Current version (%s) is the latest", currentVersion)
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func calculateSHA256(data []byte) []byte {
