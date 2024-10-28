@@ -21,7 +21,7 @@ jobs:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: GitHub Checks
-        uses: poseidon/wait-for-status-checks@v0.5.0
+        uses: poseidon/wait-for-status-checks@v0.6.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Approve a PR if not already approved
